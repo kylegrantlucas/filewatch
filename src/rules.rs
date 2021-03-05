@@ -74,8 +74,8 @@ impl RuleAction {
 #[derive(Debug, Deserialize)]
 pub struct Rule {
     pub interval: String,
-    pub actions: Vec<RuleAction>
-} 
+    pub actions: Vec<RuleAction>,
+}
 
 pub type Rules = BTreeMap<String, Rule>;
 
@@ -137,7 +137,12 @@ pub fn match_directory_listing(
     Ok(paths)
 }
 
-pub fn generate_new_filename(path: String, filepath: String, match_regex: Regex, new_format: String) {
+pub fn generate_new_filename(
+    path: String,
+    filepath: String,
+    match_regex: Regex,
+    new_format: String,
+) {
     let mut new_name = "".to_string();
     let trunc_path = str::replace(filepath.as_str(), path.as_str(), "");
     let caps = match_regex.captures(trunc_path.as_str()).unwrap();
