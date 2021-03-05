@@ -1,0 +1,11 @@
+rename_and_move_test_files:
+  interval:
+  actions:
+    - action: rename
+      match_pattern: (.*)/tst_(.*)\.(.*)
+      rename_pattern: $1/test_$2.$3
+      watch_dir: ./fixtures/test_data/
+    - action: move
+      match_pattern: .*/tst_(.*)
+      watch_dir: ./fixtures/test_data/
+      destination: /tmp/directory
