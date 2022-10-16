@@ -189,7 +189,7 @@ impl RuleAction {
             info!("renaming file: {:?} -> {:?}", path, new_filename);
         }
         if !*DRY_RUN && path != new_filename {
-            fs::rename(path, new_filename).with_context(|| {
+            fs::rename(path, new_filename.clone()).with_context(|| {
                 format!(
                     "Failed to rename file: {:?} -> {:?}",
                     path,
