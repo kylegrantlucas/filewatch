@@ -2,7 +2,7 @@
 A cli tool for performing actions on sets of files.
 
 ## Installation
-`cargo install filewatch`bash
+`cargo install filewatch`
 
 ## Usage
 `filewatch [OPTIONS] <FILE>`
@@ -44,4 +44,4 @@ rename_and_move_test_files:
 
 ## License
 
-filewatch is distributed under the terms of the MIT license.
+`filewatch` is distributed under the terms of the MIT license.
