@@ -1,11 +1,22 @@
 rename_and_move_test_files:
   interval:
   actions:
+    - action: copy
+      match_regex: (.*)/testfile_(.*)
+      watch_dir: ./fixtures/test_data
+      destination_dir: ./fixtures/test_data/backup
     - action: rename
-      match_pattern: (.*)/tst_(.*)\.(.*)
-      rename_pattern: $1/test_$2.$3
-      watch_dir: ./fixtures/test_data/
+      match_regex: test_[0-9]/testfile_(.*)
+      rename_pattern: /renamed_$1
+      watch_dir: ./fixtures/test_data
     - action: move
-      match_pattern: .*/tst_(.*)
-      watch_dir: ./fixtures/test_data/
-      destination: /tmp/directory
+      match_regex: .*/renamed_(.*)
+      watch_dir: ./fixtures/test_data
+      destination_dir: ./fixtures/test_data/moved
+    - action: copy
+      match_regex: renamed_(.*)
+      watch_dir: ./fixtures/test_data/moved
+      destination_dir: ./fixtures/test_data/backup2
+    - action: delete
+      match_regex: testfile_(.*)
+      watch_dir: ./fixtures/test_data/backup

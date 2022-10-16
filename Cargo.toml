@@ -2,7 +2,15 @@
 name = "filewatch"
 version = "0.1.0"
 authors = ["Kyle Lucas <kyle@kylelucas.io>"]
-edition = "2018"
+edition = "2021"
+description = "A tool for monitoring files to perform actions on"
+repository = "https://github.com/kylegrantlucas/filewatch"
+license = "MIT"
+readme = "README.md"
+keywords = ["file", "watch", "monitor", "action"]
+categories = ["command-line-utilities"]
+documentation = "https://docs.rs/filewatch"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
