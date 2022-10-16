@@ -16,7 +16,7 @@ rename_and_move_test_files:
   interval:
   actions:
     - action: copy
-      match_regex: (.*)/testfile_(.*)
+      match_regex: .*/testfile_.*
       watch_dir: ./fixtures/test_data
       destination_dir: ./fixtures/test_data/backup
     - action: rename
@@ -24,11 +24,11 @@ rename_and_move_test_files:
       rename_pattern: /renamed_$1
       watch_dir: ./fixtures/test_data
     - action: move
-      match_regex: .*/renamed_(.*)
+      match_regex: .*/renamed_.*
       watch_dir: ./fixtures/test_data
       destination_dir: ./fixtures/test_data/moved
     - action: delete
-      match_regex: testfile_(.*)
+      match_regex: testfile_.*
       watch_dir: ./fixtures/test_data/backup
 ```
 
