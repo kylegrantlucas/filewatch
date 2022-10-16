@@ -1,6 +1,6 @@
 [package]
 name = "filewatch"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kyle Lucas <kyle@kylelucas.io>"]
 edition = "2021"
 description = "A tool for monitoring files to perform actions on"

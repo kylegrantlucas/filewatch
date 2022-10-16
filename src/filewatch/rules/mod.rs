@@ -188,8 +188,8 @@ impl RuleAction {
         if *VERBOSE || *DRY_RUN {
             info!("renaming file: {:?} -> {:?}", path, new_filename);
         }
-        if !*DRY_RUN {
-            fs::rename(path, new_filename.clone()).with_context(|| {
+        if !*DRY_RUN && path != new_filename {
+            fs::rename(path, new_filename).with_context(|| {
                 format!(
                     "Failed to rename file: {:?} -> {:?}",
                     path,
@@ -225,9 +225,9 @@ impl RuleAction {
 
         // move file
         if *VERBOSE || *DRY_RUN {
-            info!("\t|-> moving file: {:?} -> {:?}", path, new_path);
+            info!("moving file: {:?} -> {:?}", path, new_path);
         }
-        if !*DRY_RUN {
+        if !*DRY_RUN && path != new_path {
             fs::copy(path, new_path.clone()).with_context(|| {
                 format!("Failed to copy file from {} to {}", path, new_path.clone())
             })?;
