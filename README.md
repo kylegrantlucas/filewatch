@@ -30,7 +30,7 @@ rename_and_move_test_files:
     - action: delete
       match_regex: testfile_(.*)
       watch_dir: ./fixtures/test_data/backup
-```yaml
+```
 
 ## Options
 
