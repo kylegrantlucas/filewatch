@@ -20,6 +20,9 @@ struct Args {
     /// dry run flag
     #[arg(short, long)]
     dry_run: bool,
+    /// copy mode flag
+    #[arg(short, long)]
+    copy: bool,
 }
 
 lazy_static! {
@@ -29,6 +32,8 @@ lazy_static! {
     static ref VERBOSE: bool = CLI.verbose;
     // read dry_run from cli args
     static ref DRY_RUN: bool = CLI.dry_run;
+    // read copy from cli args
+    static ref COPY: bool = CLI.copy;
 
     // RuleActionType to String HashMap
     static ref RULE_ACTION_TYPE_MAP: HashMap<filewatch::rules::RuleActionType, &'static str> = {

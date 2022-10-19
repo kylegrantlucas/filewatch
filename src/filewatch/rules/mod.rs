@@ -1,16 +1,14 @@
 //! rules module
 // global variables
+use crate::COPY;
 use crate::DRY_RUN;
 use crate::VERBOSE;
-
-// serde compatibility for regex
-mod regex;
-use self::regex::Regex;
 
 use anyhow::{anyhow, Context, Result};
 use indicatif::{ProgressBar, ProgressStyle};
 use log::{error, info};
 use rayon::prelude::*;
+use regex::Regex;
 use serde::Deserialize;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
@@ -47,6 +45,7 @@ pub struct RuleAction {
     /// ``watch_dir`` is the directory to watch for files
     watch_dir: String,
     /// ``match_regex`` is the regex to match files against
+    #[serde(with = "serde_regex")]
     match_regex: Option<Regex>,
     /// ``rename_pattern`` is the pattern to rename files with
     rename_pattern: Option<String>,
@@ -189,11 +188,11 @@ impl RuleAction {
             info!("renaming file: {:?} -> {:?}", path, new_filename);
         }
         if !*DRY_RUN && path != new_filename {
-            fs::rename(path, new_filename.clone()).with_context(|| {
+            fs::rename(path, new_filename.as_str()).with_context(|| {
                 format!(
                     "Failed to rename file: {:?} -> {:?}",
                     path,
-                    new_filename.clone()
+                    new_filename.as_str()
                 )
             })?;
         }
@@ -201,11 +200,11 @@ impl RuleAction {
         Ok(())
     }
 
-    /// mv action is a combination of copy and delete
+    /// mv action is a rename or a copy and delete
     fn mv(&self, path: &str) -> Result<()> {
         // parse destination_dir
         let destination_dir = match self.destination_dir {
-            Some(ref dest) => dest.clone(),
+            Some(ref dest) => dest.as_str(),
             None => {
                 return Err(anyhow!(
                     "destination_dir is required for rule action: {:?}",
@@ -224,15 +223,30 @@ impl RuleAction {
         let new_path = format!("{}/{}", destination_dir, filename,);
 
         // move file
-        if *VERBOSE || *DRY_RUN {
-            info!("moving file: {:?} -> {:?}", path, new_path);
-        }
-        if !*DRY_RUN && path != new_path {
-            fs::copy(path, new_path.clone()).with_context(|| {
-                format!("Failed to copy file from {} to {}", path, new_path.clone())
-            })?;
 
-            fs::remove_file(path).with_context(|| format!("Failed to remove file {}", path))?;
+        if !*DRY_RUN && path != new_path {
+            if *COPY {
+                if *VERBOSE || *DRY_RUN {
+                    info!(
+                        "moving (copy and delete) file: {:?} -> {:?}",
+                        path, new_path
+                    );
+                }
+
+                fs::copy(path, new_path.as_str()).with_context(|| {
+                    format!("Failed to copy file from {} to {}", path, new_path.as_str())
+                })?;
+
+                fs::remove_file(path).with_context(|| format!("Failed to remove file {}", path))?;
+            } else {
+                if *VERBOSE || *DRY_RUN {
+                    info!("moving (rename) file: {:?} -> {:?}", path, new_path);
+                }
+
+                fs::rename(path, new_path.as_str()).with_context(|| {
+                    format!("Failed to move file from {} to {}", path, new_path.as_str())
+                })?;
+            }
         }
 
         Ok(())
@@ -242,7 +256,7 @@ impl RuleAction {
     fn copy(&self, path: &str) -> Result<()> {
         // parse destination_dir
         let destination_dir = match self.destination_dir {
-            Some(ref dest) => dest.clone(),
+            Some(ref dest) => dest.as_str(),
             None => {
                 return Err(anyhow!(
                     "destination_dir is required for rule action: {:?}",
@@ -265,8 +279,8 @@ impl RuleAction {
             info!("copying file: {:?} -> {:?}", path, new_path);
         }
         if !*DRY_RUN {
-            fs::copy(path, new_path.clone()).with_context(|| {
-                format!("Failed to copy file from {} to {}", path, new_path.clone())
+            fs::copy(path, new_path.as_str()).with_context(|| {
+                format!("Failed to copy file from {} to {}", path, new_path.as_str())
             })?;
         }
 
@@ -290,7 +304,7 @@ impl RuleAction {
     fn link(&self, path: &str) -> Result<()> {
         // parse destination_dir
         let destination_dir = match self.destination_dir {
-            Some(ref dest) => dest.clone(),
+            Some(ref dest) => dest.as_str(),
             None => {
                 return Err(anyhow!(
                     "destination_dir is required for rule action: {:?}",
@@ -313,8 +327,8 @@ impl RuleAction {
             info!("linking file: {:?} -> {:?}", path, new_path);
         }
         if !*DRY_RUN {
-            fs::hard_link(path, new_path.clone()).with_context(|| {
-                format!("Failed to link file from {} to {}", path, new_path.clone())
+            fs::hard_link(path, new_path.as_str()).with_context(|| {
+                format!("Failed to link file from {} to {}", path, new_path.as_str())
             })?;
         }
 
@@ -331,7 +345,7 @@ impl RuleAction {
 
         // chmod file
         if *VERBOSE || *DRY_RUN {
-            info!("chmoding file: {:?} -> {:?}", path, mode);
+            info!("chmod file: {:?} -> {:?}", path, mode);
         }
         if !*DRY_RUN {
             fs::set_permissions(path, fs::Permissions::from_mode(*mode))
